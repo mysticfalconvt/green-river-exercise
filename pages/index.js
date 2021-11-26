@@ -27,7 +27,7 @@ export default function Home({ data }) {
 
         {data.map((item, questionIndex) => (
           <div key={item.id} className={styles.item}>
-            <h2>Define: {item.word}</h2>
+            <h2>Define: "{item.word}"</h2>
             {item.choices.map((choice, choiceIndex) => (
               <div key={choiceIndex}>
                 <input type="radio" name={questionIndex} value={choiceIndex}
@@ -50,6 +50,8 @@ export default function Home({ data }) {
             if (q === null) {
               return acc
             }
+            const correctChoice = data[index].correctChoiceIndex
+            const selectedChoice = questions[index]
             console.log("correct", correctChoice, "selected", selectedChoice, "q", q)
             const isCorrect = correctChoice === parseInt(selectedChoice);
             if (isCorrect) {

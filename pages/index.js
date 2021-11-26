@@ -27,7 +27,7 @@ export default function Home({ data }) {
 
         {data.map((item, questionIndex) => (
           <div key={item.id} className={styles.item}>
-            <h2>Define: "{item.word}"</h2>
+            <h2>Define: {item.word}</h2>
             {item.choices.map((choice, choiceIndex) => (
               <div key={choiceIndex}>
                 <input type="radio" name={questionIndex} value={choiceIndex}

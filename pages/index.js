@@ -3,14 +3,14 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import { useState } from 'react'
 
-export default function Home({ data }) {
-  const questionCount = data.length
-
-  const emptyArray = new Array(questionCount).fill(null)
-  const [questions, setQuestions] = useState(emptyArray)
-  const questionsAnswered = questions.filter(q => q !== null).length
+export default function Home({ questionsList }) {
+  const [questions, setQuestions] = useState(questionsList)
   const [score, setScore] = useState(0)
-  console.log(data)
+  const questionCount = questions.length
+  const questionsAnswered = questions.filter(question => question.answer).length
+  const percentageAnswered = Math.round((questionsAnswered / questionCount) * 100)
+  const percentageCorrect = Math.round((score / questionCount) * 100)
+
   return (
     <div className={styles.container}>
       <Head>
@@ -24,44 +24,46 @@ export default function Home({ data }) {
           Welcome to <a href="https://www.greenriver.com/">Green River</a>
         </h1>
         <p>You have answered {questionsAnswered} out of {questionCount}</p>
+        {/* added progress bar */}
+        <progress value={percentageAnswered} max="100"></progress>
+        <div className={styles.grid}>
+          {questions.map((item) => (
+            <div key={`Question ${item.id}`} className={styles.card}>
+              <h2>Define: {item.word}</h2>
+              {item.choices.map((choice, choiceIndex) => (
+                <div key={`Answer ${choiceIndex}`}>
+                  <input type="radio" name={item.questionIndex} value={choiceIndex}
+                    onChange={(e) => {
+                      const newQuestions = [...questions]
+                      newQuestions[item.questionIndex].answer = e.target.value
+                      setQuestions(newQuestions)
+                    }
+                    }
+                  />
+                  <label htmlFor={choiceIndex}>{choice.text}</label>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <span>Your Score: {score} out of {questionCount} - {percentageCorrect}%</span>
+        {percentageCorrect != 0 && <progress value={percentageCorrect} max="100" />}
 
-        {data.map((item, questionIndex) => (
-          <div key={item.id} className={styles.item}>
-            <h2>Define: {item.word}</h2>
-            {item.choices.map((choice, choiceIndex) => (
-              <div key={choiceIndex}>
-                <input type="radio" name={questionIndex} value={choiceIndex}
-                  onChange={(e) => {
-                    const newQuestions = [...questions]
-                    newQuestions[questionIndex] = e.target.value
-                    setQuestions(newQuestions)
-                  }
-                  }
-                />
-                <label htmlFor={choiceIndex}>{choice.text}</label>
-              </div>
-            ))}
-          </div>
-        ))}
-        <span>Your Score: {score} </span>
-        <button type='button' onClick={() => {
-          const newScore = questions.reduce((acc, q, index) => {
-            console.log(index)
-            if (q === null) {
+
+        <button type='button'
+          disabled={percentageAnswered < 100}
+          onClick={() => {
+            const newScore = questions.reduce((acc, q, index) => {
+              if (q === null) {
+                return acc
+              }
+              if (parseInt(q.answer) === parseInt(q.correctChoiceIndex)) {
+                return acc + 1
+              }
               return acc
-            }
-            const correctChoice = data[index].correctChoiceIndex
-            const selectedChoice = questions[index]
-            console.log("correct", correctChoice, "selected", selectedChoice, "q", q)
-            const isCorrect = correctChoice === parseInt(selectedChoice);
-            if (isCorrect) {
-              return acc + 1
-            }
-            return acc
-          }, 0)
-          console.log("newScore", newScore)
-          setScore(newScore)
-        }}>Submit</button>
+            }, 0)
+            setScore(newScore)
+          }}>Submit</button>
       </main>
 
 
@@ -89,9 +91,13 @@ export async function getStaticProps() {
   const data = await fetch(url)
     .then((response) => response.json())
     .catch((error) => console.log(error));
+  const questionsList = data.map((item, index) => {
+    item = { ...item, answer: null, questionIndex: index }
+    return item
+  })
 
 
   return {
-    props: { data }, // will be passed to the page component as props
+    props: { questionsList }, // will be passed to the page component as props
   };
 }

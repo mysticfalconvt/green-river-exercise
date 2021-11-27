@@ -32,7 +32,7 @@ export default function Home({ questionsList }) {
               <h2>Define: {item.word}</h2>
               {item.choices.map((choice, choiceIndex) => (
                 <div key={`Answer ${choiceIndex}`}>
-                  <input type="radio" name={item.questionIndex} value={choiceIndex}
+                  <input type="radio" name={item.questionIndex} id={`question ${item.questionIndex} choice ${choiceIndex}`} value={choiceIndex}
                     onChange={(e) => {
                       const newQuestions = [...questions]
                       newQuestions[item.questionIndex].answer = e.target.value
@@ -40,7 +40,7 @@ export default function Home({ questionsList }) {
                     }
                     }
                   />
-                  <label htmlFor={choiceIndex}>{choice.text}</label>
+                  <label htmlFor={`question ${item.questionIndex} choice ${choiceIndex}`}>{choice.text}</label>
                 </div>
               ))}
             </div>
